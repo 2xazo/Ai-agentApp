@@ -12,7 +12,8 @@ export function useTranscription() {
       const text = await transcribeAudio(file);
       setTranscript(text);
       setStatus('done');
-    } catch {
+    } catch (error) {
+      console.error('Transcription error:', error);
       setStatus('error');
     }
   }, []);

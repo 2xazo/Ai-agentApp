@@ -1,16 +1,17 @@
-// src/App.jsx (updated)
+// src/App.jsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import Layout from './components/shared/Layout';
+import ProtectedRoute from './components/shared/ProtectedRoute';
 import Home from './pages/Home';
 import { useAuth } from './context/AuthContext';
 import { AuthProvider } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import ChatPage from './pages/ChatPage';
-import TranscriptionPage from './pages/TranscriptionPage';
-import Profile from './pages/Profile';
+import ChatInterface from './components/chat/ChatInterface';
+import TranscriptionViewer from './components/transcription/TranscriptionViewer';
+import APIKeyManager from './components/profile/APIKeyManager';
 
 const queryClient = new QueryClient();
 
@@ -36,38 +37,52 @@ function App() {
         <AppProvider>
           <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Home />} />
+
+              {/* Protected Routes */}
               <Route
                 path="/chat"
                 element={
                   <ProtectedRoute>
                     <Layout theme={theme} setTheme={setTheme}>
-                      <ChatPage />
+                      <ChatInterface />
                     </Layout>
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/transcribe"
                 element={
                   <ProtectedRoute>
                     <Layout theme={theme} setTheme={setTheme}>
-                      <TranscriptionPage />
+                      <TranscriptionViewer />
                     </Layout>
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/profile"
                 element={
                   <ProtectedRoute>
                     <Layout theme={theme} setTheme={setTheme}>
-                      <Profile />
+                      <APIKeyManager />
                     </Layout>
                   </ProtectedRoute>
                 }
               />
-              <Route path="*" element={<Navigate to="/" replace />} />
+
+              {/* Fallback Route */}
+              <Route
+                path="*"
+                element={
+                  <Layout theme={theme} setTheme={setTheme}>
+                    <Navigate to="/" replace />
+                  </Layout>
+                }
+              />
             </Routes>
             <Toaster
               position="top-right"
@@ -84,35 +99,6 @@ function App() {
       </AuthProvider>
     </QueryClientProvider>
   );
-}
-
-function ProtectedRoute({ children }) {
-  const { currentUser, loading, error } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Error</h2>
-          <p className="text-gray-600 dark:text-gray-400">{error.message}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!currentUser) {
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
 }
 
 export default App;

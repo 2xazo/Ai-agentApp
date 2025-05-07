@@ -4,9 +4,15 @@ import { useApp } from '../../context/AppContext';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import { v4 as uuidv4 } from 'uuid';
+import { useChat } from '../../hooks/useChat';
+import { toast } from 'react-hot-toast';
+import { SparklesIcon } from '@heroicons/react/24/outline';
 
 export default function ChatInterface() {
   const { state, dispatch } = useApp();
+  const [inputMessage, setInputMessage] = useState('');
+  const messagesEndRef = useRef(null);
+  const { messages, sendMessage, loading } = useChat(state.currentConversation?.id);
 
   // BOOTSTRAP A NEW CONVERSATION ONCE
   useEffect(() => {
@@ -17,66 +23,46 @@ export default function ChatInterface() {
         messages: [],
         createdAt: new Date().toISOString(),
       };
-      dispatch({ type: 'ADD_CONVERSATION',        payload: conv });
+      dispatch({ type: 'ADD_CONVERSATION', payload: conv });
       dispatch({ type: 'SET_CURRENT_CONVERSATION', payload: conv });
     }
   }, [state.currentConversation, dispatch]);
 
-  const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef(null);
-
   // auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [state.currentConversation?.messages]);
+  }, [messages]);
 
   const handleSendMessage = async (message) => {
     if (!message.trim()) return;
 
-    // add user message
-    const userMessage = {
-      id: uuidv4(),
-      content: message.trim(),
-      role: 'user',
-      timestamp: new Date().toISOString(),
-    };
-    dispatch({
-      type: 'ADD_MESSAGE',
-      payload: {
-        conversationId: state.currentConversation.id,
-        message: userMessage,
-      },
-    });
+    const apiKey = localStorage.getItem('openai_api_key');
+    if (!apiKey) {
+      toast.error('Please set your OpenAI API key in the Profile section');
+      return;
+    }
 
-    setInputMessage('');
-    setIsLoading(true);
-
-    // placeholder AI reply (swap in your OpenAI call here)
-    const aiMessage = {
-      id: uuidv4(),
-      content: 'This is a placeholder response. OpenAI API integration goes here.',
-      role: 'assistant',
-      timestamp: new Date().toISOString(),
-    };
-    dispatch({
-      type: 'ADD_MESSAGE',
-      payload: {
-        conversationId: state.currentConversation.id,
-        message: aiMessage,
-      },
-    });
-
-    setIsLoading(false);
+    try {
+      await sendMessage(message);
+      setInputMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   return (
     <div className="flex flex-col h-full w-full">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-3 shadow-md">
+        <div className="max-w-2xl mx-auto w-full flex items-center space-x-2">
+          <SparklesIcon className="h-6 w-6 text-white" />
+          <h1 className="text-lg font-semibold text-white">AZO AI Assistant</h1>
+        </div>
+      </div>
+
       {/* message history */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
-        {state.currentConversation && (
-          <MessageList messages={state.currentConversation.messages} />
-        )}
+        <MessageList messages={messages} />
         <div ref={messagesEndRef} />
       </div>
 
@@ -87,7 +73,7 @@ export default function ChatInterface() {
             value={inputMessage}
             onChange={setInputMessage}
             onSend={handleSendMessage}
-            isLoading={isLoading}
+            isLoading={loading}
           />
         </div>
       </div>

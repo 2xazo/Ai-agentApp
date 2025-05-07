@@ -37,7 +37,7 @@ export default function Layout({ theme, setTheme, children }) {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setIsSidebarOpen(false)} />
         <div className="fixed inset-y-0 left-0 flex w-72 flex-col bg-white dark:bg-gray-800">
           <div className="flex h-20 items-center justify-between px-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AI Agent</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AZO AI Agent</h1>
             <button onClick={() => setIsSidebarOpen(false)}>
               <XMarkIcon className="h-7 w-7 text-gray-500" />
             </button>
@@ -65,7 +65,7 @@ export default function Layout({ theme, setTheme, children }) {
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col">
         <div className="flex min-h-0 flex-1 flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
           <div className="flex h-20 items-center px-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AI Agent</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AZO AI Agent</h1>
           </div>
           <nav className="flex-1 space-y-2 px-4 py-6">
             {navigation.map((item) => (

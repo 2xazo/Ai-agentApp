@@ -6,7 +6,10 @@ import {
   signOut, 
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  setPersistence,
+  browserLocalPersistence,
+  getAuth
 } from 'firebase/auth';
 import { toast } from 'react-hot-toast';
 import { auth } from '../config/firebase';
@@ -24,40 +27,42 @@ export function AuthProvider({ children }) {
   const googleProvider = new GoogleAuthProvider();
 
   useEffect(() => {
-    console.log('AuthProvider: Starting initialization...');
+    let unsubscribe;
     
-    // Check if auth is properly initialized
-    if (!auth) {
-      console.error('Auth is not initialized');
-      setError(new Error('Authentication service not initialized'));
-      setLoading(false);
-      return;
-    }
+    const initializeAuth = async () => {
+      try {
+        // Set persistence to LOCAL
+        await setPersistence(auth, browserLocalPersistence);
+        console.log('Persistence set to LOCAL');
 
-    try {
-      console.log('AuthProvider: Setting up auth state listener...');
-      const unsubscribe = onAuthStateChanged(auth, 
-        (user) => {
-          console.log('Auth state changed:', user ? 'User logged in' : 'No user');
-          setCurrentUser(user);
-          setLoading(false);
-        }, 
-        (error) => {
-          console.error('Auth state change error:', error);
-          setError(error);
-          setLoading(false);
-        }
-      );
+        // Set up auth state listener
+        unsubscribe = onAuthStateChanged(auth, 
+          (user) => {
+            console.log('Auth state changed:', user ? 'User logged in' : 'No user');
+            setCurrentUser(user);
+            setLoading(false);
+          }, 
+          (error) => {
+            console.error('Auth state change error:', error);
+            setError(error);
+            setLoading(false);
+          }
+        );
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        setError(error);
+        setLoading(false);
+      }
+    };
 
-      return () => {
-        console.log('AuthProvider: Cleaning up...');
+    initializeAuth();
+
+    // Cleanup subscription on unmount
+    return () => {
+      if (unsubscribe) {
         unsubscribe();
-      };
-    } catch (error) {
-      console.error('Auth initialization error:', error);
-      setError(error);
-      setLoading(false);
-    }
+      }
+    };
   }, []);
 
   const value = {
@@ -100,6 +105,7 @@ export function AuthProvider({ children }) {
     logout: async () => {
       try {
         await signOut(auth);
+        setCurrentUser(null);
         toast.success('Logged out successfully!');
       } catch (error) {
         console.error('Logout error:', error);
@@ -122,7 +128,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }

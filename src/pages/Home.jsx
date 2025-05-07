@@ -1,7 +1,7 @@
 // src/pages/Home.jsx
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
 export default function Home() {
@@ -11,8 +11,10 @@ export default function Home() {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const apiKey = localStorage.getItem('openai_api_key');
+  // Get the redirect path from location state or default to /chat
+  const from = location.state?.from?.pathname || '/chat';
 
   if (loading) {
     return (
@@ -20,10 +22,6 @@ export default function Home() {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
       </div>
     );
-  }
-
-  if (currentUser) {
-    return <Navigate to="/chat" replace />;
   }
 
   const handleSubmit = async (e) => {
@@ -36,7 +34,7 @@ export default function Home() {
       } else {
         await signup(email, password);
       }
-      navigate('/chat');
+      navigate(from, { replace: true });
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -48,7 +46,7 @@ export default function Home() {
     setIsSubmitting(true);
     try {
       await loginWithGoogle();
-      navigate('/chat');
+      navigate(from, { replace: true });
     } catch (error) {
       toast.error(error.message);
     } finally {
