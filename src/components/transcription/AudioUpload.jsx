@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FiUpload, FiFile } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import { transcribeAudio } from '../../services/openai';
 
 export default function AudioUpload({ onTranscriptionStart, onTranscriptionComplete }) {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -13,45 +14,31 @@ export default function AudioUpload({ onTranscriptionStart, onTranscriptionCompl
       'audio/*': ['.mp3', '.wav', '.m4a', '.ogg']
     },
     maxFiles: 1,
-    onDrop: (acceptedFiles) => {
+    onDrop: async (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
-        setSelectedFile(acceptedFiles[0]);
+        const file = acceptedFiles[0];
+        setSelectedFile(file);
+        
+        try {
+          setIsLoading(true);
+          onTranscriptionStart();
+
+          const text = await transcribeAudio(file);
+          onTranscriptionComplete(text);
+          toast.success('Transcription completed successfully!');
+        } catch (error) {
+          console.error('Transcription error:', error);
+          if (error.message.includes('API key')) {
+            toast.error('Please set your OpenAI API key in the Profile section');
+          } else {
+            toast.error('Failed to transcribe audio. Please try again.');
+          }
+        } finally {
+          setIsLoading(false);
+        }
       }
     }
   });
-
-  const handleTranscribe = async () => {
-    if (!selectedFile) {
-      toast.error('Please select an audio file first');
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      onTranscriptionStart();
-
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-
-      const response = await fetch('/api/transcribe', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Transcription failed');
-      }
-
-      const data = await response.json();
-      onTranscriptionComplete(data.text);
-      toast.success('Transcription completed successfully!');
-    } catch (error) {
-      console.error('Transcription error:', error);
-      toast.error('Failed to transcribe audio. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -88,17 +75,11 @@ export default function AudioUpload({ onTranscriptionStart, onTranscriptionCompl
               </p>
             </div>
           </div>
-          <button
-            onClick={handleTranscribe}
-            disabled={isLoading}
-            className={`px-4 py-2 rounded-md text-white font-medium
-              ${isLoading
-                ? 'bg-blue-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700'
-              }`}
-          >
-            {isLoading ? 'Transcribing...' : 'Transcribe'}
-          </button>
+          {isLoading && (
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Transcribing...
+            </div>
+          )}
         </div>
       )}
     </div>

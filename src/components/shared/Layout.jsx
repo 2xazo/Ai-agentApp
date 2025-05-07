@@ -42,11 +42,12 @@ export default function Layout({ theme, setTheme, children }) {
               <XMarkIcon className="h-7 w-7 text-gray-500" />
             </button>
           </div>
-          <nav className="flex-1 space-y-2 px-4 py-6">
+          <nav className="flex-1 space-y-2 px-4 py-6 overflow-y-auto">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
+                onClick={() => setIsSidebarOpen(false)}
                 className={`group flex items-center px-4 py-3 text-base font-medium rounded-md ${
                   location.pathname === item.href
                     ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300'
@@ -67,7 +68,7 @@ export default function Layout({ theme, setTheme, children }) {
           <div className="flex h-20 items-center px-6">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AZO AI Agent</h1>
           </div>
-          <nav className="flex-1 space-y-2 px-4 py-6">
+          <nav className="flex-1 space-y-2 px-4 py-6 overflow-y-auto">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -109,8 +110,8 @@ export default function Layout({ theme, setTheme, children }) {
           </button>
         </div>
 
-        <main className="flex-1 bg-gray-50 dark:bg-gray-900 w-full h-full relative overflow-hidden">
-          <div className="absolute inset-0 px-8 py-6 flex flex-col">
+        <main className="flex-1 bg-gray-50 dark:bg-gray-900 w-full h-full relative overflow-y-auto">
+          <div className="absolute inset-0 px-8 py-6 flex flex-col overflow-y-auto">
             {children}
           </div>
         </main>

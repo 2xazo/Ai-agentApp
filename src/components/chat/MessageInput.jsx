@@ -40,7 +40,7 @@ const MessageInput = forwardRef(function MessageInput({ value, onChange, onSend,
         onKeyDown={handleKeyDown}
         placeholder="Type your message..."
         rows={1}
-        className="w-full px-4 py-3 pr-12 text-sm sm:text-base leading-6 text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
+        className="w-full px-4 py-3 pr-12 text-sm sm:text-base leading-6 text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none overflow-hidden transition-all"
         disabled={isLoading}
       />
       <button
