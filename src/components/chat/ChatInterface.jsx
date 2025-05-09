@@ -56,7 +56,14 @@ export default function ChatInterface() {
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-3 shadow-md">
         <div className="max-w-2xl mx-auto w-full flex items-center space-x-2">
           <SparklesIcon className="h-6 w-6 text-white" />
-          <h1 className="text-lg font-semibold text-white">AZO AI Assistant</h1>
+          <a 
+            href="https://www.linkedin.com/in/abdulaziz-alothman-791a6526a/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-lg font-semibold text-white cursor-pointer hover:text-purple-200 transition-colors duration-300"
+          >
+            AZO AI Assistant
+          </a>
         </div>
       </div>
 
